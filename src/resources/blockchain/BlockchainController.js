@@ -1,4 +1,4 @@
-import Blockchain from '../utils/blockchain'
+import Blockchain from '../../utils/blockchain'
 import uuid from 'uuid/v1'
 import rp from 'request-promise'
 const nodeAddress = uuid().split('-').join('')

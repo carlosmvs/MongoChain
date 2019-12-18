@@ -1,6 +1,6 @@
 import express from 'express'
-import routesBlockchain from './blockchain/BlockchainRouter'
-import routesUser from './users/UserRouter'
+import routesBlockchain from './resources/blockchain/BlockchainRouter'
+import routesUser from './resources/users/UserRouter'
 
 class APP {
   constructor(){
