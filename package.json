@@ -5,7 +5,11 @@
   "author": "carlosmvs <carlosmanoelti@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "node_1": "nodemon src/server.js 3001 http://localhost:3001",
+    "node_2": "nodemon src/server.js 3002 http://localhost:3002",
+    "node_3": "nodemon src/server.js 3003 http://localhost:3003",
+    "node_4": "nodemon src/server.js 3004 http://localhost:3004",
+    "node_5": "nodemon src/server.js 3005 http://localhost:3005"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
