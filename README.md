@@ -1,2 +1,2 @@
-# cass
-Framework CASS para ACID, Blockchain e NoSQL.
+# ACIDNoSQLChain
+Framework com funcionalidades que fazem a integração dos conceitos de ACID, Blockchain e NoSQL.
