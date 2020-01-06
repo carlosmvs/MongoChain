@@ -5,13 +5,10 @@ import uuid from 'uuid/v1';
 function Blockchain() {
 	this.chain = [];
 	this.pendingTransactions = [];
-
 	this.currentNodeUrl = currentNodeUrl;
 	this.networkNodes = [];
-
 	this.createNewBlock(100, '0', '0');
 };
-
 
 Blockchain.prototype.createNewBlock = function (nonce, previousBlockHash, hash) {
 	const newBlock = {
@@ -31,14 +28,17 @@ Blockchain.prototype.getLastBlock = function () {
 	return this.chain[this.chain.length - 1];
 };
 
-Blockchain.prototype.createNewTransaction = function (title, price, date, userId, establishmentId, miner) {
+Blockchain.prototype.createNewTransaction = function (title, price, date, userId, establishmentId,
+	amount, sender, recipient) {
 	const newTransaction = {
 		title: title,
 		price: price,
 		date: date,
 		userId: userId,
 		establishmentId: establishmentId,
-		miner: miner,
+		amount: amount,
+		sender: sender,
+		recipient: recipient,
 		transactionId: uuid().split('-').join('')
 	};
 	return newTransaction;
