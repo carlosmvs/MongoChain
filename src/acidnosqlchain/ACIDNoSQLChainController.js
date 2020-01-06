@@ -99,7 +99,6 @@ class ACIDNoSQLChainController {
 	// broadcast transaction
 	async storeBroadcastTransaction(req, res) {
 		const newTransaction = ACIDNoSQLChain.createNewTransaction(
-			req.body.title, req.body.price, req.body.date, req.body.userId, req.body.establishmentId,
 			req.body.amount, req.body.sender, req.body.recipient);
 		ACIDNoSQLChain.addTransactionToPendingTransactions(newTransaction);
 		const requestPromises = [];
