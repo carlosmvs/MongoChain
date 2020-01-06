@@ -1,4 +1,4 @@
-import Blockchain from '../../utils/blockchain'
+import Blockchain from '../utils/blockchain'
 import mongoose from 'mongoose'
 import rp from 'request-promise'
 import ACIDNoSQLChainBlockModel from './ACIDNoSQLChainBlockModel'
