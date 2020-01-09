@@ -1,8 +1,11 @@
 import Blockchain from '../utils/blockchain'
-import mongoose from 'mongoose'
+import mongoose, { mongo } from 'mongoose'
 import rp from 'request-promise'
+const uuid = require('uuid/v1');
+const nodeAddress = uuid().split('-').join('');
 import ACIDNoSQLChainBlockModel from './ACIDNoSQLChainBlockModel'
 import ACIDNoSQLChainNodeModel from './ACIDNoSQLChainNodeModel'
+import ACIDNoSQLChainNotification from './ACIDNoSQLChainNotificationModel'
 const ACIDNoSQLChain = new Blockchain();
 
 class ACIDNoSQLChainController {
@@ -141,11 +144,6 @@ class ACIDNoSQLChainController {
 
 	// mine a block
 	async indexMine(req, res) {
-		let sender = ""
-		let recipient = req.headers.host
-		ACIDNoSQLChain.pendingTransactions.forEach(e => {
-			sender = e.userId
-		})
 
 		const lastBlock = ACIDNoSQLChain.getLastBlock();
 
@@ -175,9 +173,9 @@ class ACIDNoSQLChainController {
 					uri: ACIDNoSQLChain.currentNodeUrl + '/transaction/broadcast',
 					method: 'POST',
 					body: {
-						amount: 2,
-						sender: sender,
-						recipient: recipient
+						amount: 0,
+						sender: "00",
+						recipient: nodeAddress
 					},
 					json: true
 				};
@@ -192,10 +190,6 @@ class ACIDNoSQLChainController {
 
 		let blocks = []
 		let arrayBlockHash = []
-		let reservation = {}
-		let newBlockTransactions = newBlock.transactions.filter(e => {
-			return e.userId != undefined
-		})
 		let blockchain = await ACIDNoSQLChainBlockModel.find()
 		blockchain.forEach(e => {
 			arrayBlockHash.push(e.block.hash)
@@ -209,19 +203,22 @@ class ACIDNoSQLChainController {
 		newBlock.index = arrayMax(blocks) + 1
 		newBlock.previousBlockHash = arrayBlockHash.pop()
 
-		//Add transactions ACID + Blockchain
-		const session = await mongoose.startSession()
+		//Add transactions ACID + Blockchain in MongoDB
+		const sessionOne = await mongoose.startSession()
+		const sessionTwo = await mongoose.startSession()
+		sessionOne.startTransaction()
 		try {
-			session.startTransaction()
-			await ACIDNoSQLChainBlockModel.create({ block: newBlock }).then(() => {
-				newBlockTransactions.forEach(e => {
-				})
-			}).session(session)
-			await session.commitTransaction()
+			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { sessionOne })
+			await sessionOne.commitTransaction()
+
+			await ACIDNoSQLChainNotification.create([{ message: "ok" }], { sessionTwo })
+			await sessionTwo.commitTransaction()
 		} catch (err) {
-			await session.abortTransaction()
+			await sessionOne.abortTransaction()
+			await sessionTwo.abortTransaction()
 		} finally {
-			session.endSession()
+			sessionOne.endSession()
+			sessionTwo.endSession()
 		}
 	}
 
