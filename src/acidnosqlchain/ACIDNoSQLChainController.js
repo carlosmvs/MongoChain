@@ -1,36 +1,44 @@
 import Blockchain from '../utils/blockchain'
-import mongoose, { mongo } from 'mongoose'
+import mongoose from 'mongoose'
 import rp from 'request-promise'
-const uuid = require('uuid/v1');
-const nodeAddress = uuid().split('-').join('');
 import ACIDNoSQLChainBlockModel from './ACIDNoSQLChainBlockModel'
-import ACIDNoSQLChainNodeModel from './ACIDNoSQLChainNodeModel'
-import ACIDNoSQLChainNotification from './ACIDNoSQLChainNotificationModel'
+import ACIDNoSQLChainMineModel from './ACIDNoSQLChainMineModel'
 const ACIDNoSQLChain = new Blockchain();
 
 class ACIDNoSQLChainController {
 
-	//create a new blockchain call blocks in MongoDB
-	async storeBlockchain(req, res) {
+	//create a new blockchain call blocks in MongoDB for user admin framework
+	async storeBlockchainMongo(req, res) {
 		//se não houver documentos adiciona o lastBlock.
 		const lastBlock = ACIDNoSQLChain.getLastBlock();
 		let documents = await ACIDNoSQLChainBlockModel.find()
 		if (documents.length == 0) {
 			await ACIDNoSQLChainBlockModel.create({ block: lastBlock })
 		}
-		res.json({ note: `Collection Chain created and add genesis block ${lastBlock}` })
-	}
+		res.json({ note: `Collection Chain created and add genesis block` })
+}
 
-	// get entire blockchain current in server
-	async indexBlockchainServer(req, res) {
-		res.send(ACIDNoSQLChain);
-	}
+async storeMineMongo(req, res) {
+	await ACIDNoSQLChainMineModel.create({mineAddress: "Bloco Genesis não minerado"})
+	res.json({note: `Collection Miner created`})
+}
 
-	//get entire blockchain in MongoDB with ACID Concurrency Control  
-	async indexBlockchain(req, res) {
+	//get entire blockchain in MongoDB to clients 
+	async indexBlockchainMongo(req, res) {
 		const chain = await ACIDNoSQLChainBlockModel.find()
 		return res.json(chain)
 	}
+
+		//return all miners of collection miners in MongoDB
+		async indexMineMongo(req, res) {
+			const nodes = await ACIDNoSQLChainMineModel.find()
+			res.json(nodes)
+		}
+
+		// get entire blockchain current in server
+	  async indexBlockchain(req, res) {
+		res.send(ACIDNoSQLChain);
+		}
 
 	// register a node with the network
 	async storeNode(req, res) {
@@ -39,7 +47,6 @@ class ACIDNoSQLChainController {
 		const notCurrentNode = ACIDNoSQLChain.currentNodeUrl !== newNodeUrl;
 		if (nodeNotAlreadyPresent && notCurrentNode) {
 			ACIDNoSQLChain.networkNodes.push(newNodeUrl)
-			ACIDNoSQLChainNodeModel.create(req.body).then(() => { })
 		}
 		res.json({ note: 'New node registered successfully.' });
 	}
@@ -84,12 +91,6 @@ class ACIDNoSQLChainController {
 			.then(data => {
 				res.json({ note: 'New node registered with network successfully.' });
 			});
-	}
-
-	//return all nodes of collection NODES in MongoDB
-	async indexNode(req, res) {
-		const nodes = await ACIDNoSQLChainNodeModel.find()
-		res.json(nodes)
 	}
 
 	// create a new transaction
@@ -144,9 +145,7 @@ class ACIDNoSQLChainController {
 
 	// mine a block
 	async indexMine(req, res) {
-
 		const lastBlock = ACIDNoSQLChain.getLastBlock();
-
 		const previousBlockHash = lastBlock['hash'];
 		const currentBlockData = {
 			transactions: ACIDNoSQLChain.pendingTransactions,
@@ -156,9 +155,7 @@ class ACIDNoSQLChainController {
 		const blockHash = ACIDNoSQLChain.hashBlock(previousBlockHash, currentBlockData, nonce);
 		const newBlock = ACIDNoSQLChain.createNewBlock(nonce, previousBlockHash, blockHash);
 		const requestPromises = [];
-
 		ACIDNoSQLChain.networkNodes.forEach(networkNodeUrl => {
-
 			const requestOptions = {
 				uri: networkNodeUrl + '/block',
 				method: 'POST',
@@ -175,7 +172,7 @@ class ACIDNoSQLChainController {
 					body: {
 						amount: 0,
 						sender: "00",
-						recipient: nodeAddress
+						recipient: ACIDNoSQLChain.currentNodeUrl
 					},
 					json: true
 				};
@@ -203,22 +200,17 @@ class ACIDNoSQLChainController {
 		newBlock.index = arrayMax(blocks) + 1
 		newBlock.previousBlockHash = arrayBlockHash.pop()
 
-		//Add transactions ACID + Blockchain in MongoDB
-		const sessionOne = await mongoose.startSession()
-		const sessionTwo = await mongoose.startSession()
-		sessionOne.startTransaction()
+		//Add transactions ACID + Blockchain in SGBD de agregabos MongoDB
+		const session = await mongoose.startSession()
+		session.startTransaction()
 		try {
-			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { sessionOne })
-			await sessionOne.commitTransaction()
-
-			await ACIDNoSQLChainNotification.create([{ message: "ok" }], { sessionTwo })
-			await sessionTwo.commitTransaction()
+			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { session })
+			await ACIDNoSQLChainMineModel.create([{ mineAddress: ACIDNoSQLChain.currentNodeUrl }], { session })
+			await session.commitTransaction()
 		} catch (err) {
-			await sessionOne.abortTransaction()
-			await sessionTwo.abortTransaction()
+			await session.abortTransaction()		
 		} finally {
-			sessionOne.endSession()
-			sessionTwo.endSession()
+			session.endSession()			
 		}
 	}
 
@@ -264,34 +256,6 @@ class ACIDNoSQLChainController {
 					});
 				}
 			});
-	}
-
-	// get block by blockHash
-	async getBlockByBlockchain(req, res) {
-		const blockHash = req.params.blockHash;
-		const correctBlock = ACIDNoSQLChain.getBlock(blockHash);
-		res.json({
-			block: correctBlock
-		});
-	}
-
-	// get transaction by transactionId
-	async getTransactionByTransactionId(req, res) {
-		const transactionId = req.params.transactionId;
-		const trasactionData = ACIDNoSQLChain.getTransaction(transactionId);
-		res.json({
-			transaction: trasactionData.transaction,
-			block: trasactionData.block
-		});
-	}
-
-	// get address by address
-	async getAddress(req, res) {
-		const address = req.params.address;
-		const addressData = ACIDNoSQLChain.getAddressData(address);
-		res.json({
-			addressData: addressData
-		});
 	}
 }
 
