@@ -1,8 +1,13 @@
 import Blockchain from '../utils/blockchain'
 import mongoose from 'mongoose'
 import rp from 'request-promise'
+import uuid from 'uuid/v1'
+const nodeAddress = uuid().split('-').join('');
 import ACIDNoSQLChainBlockModel from './ACIDNoSQLChainBlockModel'
-import ACIDNoSQLChainMineModel from './ACIDNoSQLChainMineModel'
+import ACIDNoSQLChainSenderModel from './ACIDNoSQLChainSender.Model'
+import ACIDNoSQLChainRecipientModel from './ACIDNoSQLChainRecipientModel'
+import ACIDNoSQLChainTransferenceModel from './ACIDNoSQLChainTransference.Model'
+
 const ACIDNoSQLChain = new Blockchain();
 
 class ACIDNoSQLChainController {
@@ -16,12 +21,7 @@ class ACIDNoSQLChainController {
 			await ACIDNoSQLChainBlockModel.create({ block: lastBlock })
 		}
 		res.json({ note: `Collection Chain created and add genesis block` })
-}
-
-async storeMineMongo(req, res) {
-	await ACIDNoSQLChainMineModel.create({mineAddress: "Bloco Genesis não minerado"})
-	res.json({note: `Collection Miner created`})
-}
+	}
 
 	//get entire blockchain in MongoDB to clients 
 	async indexBlockchainMongo(req, res) {
@@ -29,16 +29,10 @@ async storeMineMongo(req, res) {
 		return res.json(chain)
 	}
 
-		//return all miners of collection miners in MongoDB
-		async indexMineMongo(req, res) {
-			const nodes = await ACIDNoSQLChainMineModel.find()
-			res.json(nodes)
-		}
-
-		// get entire blockchain current in server
-	  async indexBlockchain(req, res) {
+	// get entire blockchain current in server
+	async indexBlockchain(req, res) {
 		res.send(ACIDNoSQLChain);
-		}
+	}
 
 	// register a node with the network
 	async storeNode(req, res) {
@@ -103,7 +97,8 @@ async storeMineMongo(req, res) {
 	// broadcast transaction
 	async storeBroadcastTransaction(req, res) {
 		const newTransaction = ACIDNoSQLChain.createNewTransaction(
-			req.body.amount, req.body.sender, req.body.recipient);
+			req.body.senderId, req.body.recipientId, req.body.amount,
+			1.5, nodeAddress);
 		ACIDNoSQLChain.addTransactionToPendingTransactions(newTransaction);
 		const requestPromises = [];
 		ACIDNoSQLChain.networkNodes.forEach(networkNodeUrl => {
@@ -114,7 +109,7 @@ async storeMineMongo(req, res) {
 				json: true
 			};
 			requestPromises.push(rp(requestOptions));
-		});
+		})
 		Promise.all(requestPromises)
 			.then(data => {
 				res.json({ note: 'Transaction created and broadcast successfully.' });
@@ -141,79 +136,8 @@ async storeMineMongo(req, res) {
 				newBlock: newBlock
 			});
 		}
+
 	}
-
-	// mine a block
-	async indexMine(req, res) {
-		const lastBlock = ACIDNoSQLChain.getLastBlock();
-		const previousBlockHash = lastBlock['hash'];
-		const currentBlockData = {
-			transactions: ACIDNoSQLChain.pendingTransactions,
-			index: lastBlock['index'] + 1
-		};
-		const nonce = ACIDNoSQLChain.proofOfWork(previousBlockHash, currentBlockData);
-		const blockHash = ACIDNoSQLChain.hashBlock(previousBlockHash, currentBlockData, nonce);
-		const newBlock = ACIDNoSQLChain.createNewBlock(nonce, previousBlockHash, blockHash);
-		const requestPromises = [];
-		ACIDNoSQLChain.networkNodes.forEach(networkNodeUrl => {
-			const requestOptions = {
-				uri: networkNodeUrl + '/block',
-				method: 'POST',
-				body: { newBlock: newBlock },
-				json: true
-			};
-			requestPromises.push(rp(requestOptions));
-		});
-		Promise.all(requestPromises)
-			.then(data => {
-				const requestOptions = {
-					uri: ACIDNoSQLChain.currentNodeUrl + '/transaction/broadcast',
-					method: 'POST',
-					body: {
-						amount: 0,
-						sender: "00",
-						recipient: ACIDNoSQLChain.currentNodeUrl
-					},
-					json: true
-				};
-				return rp(requestOptions);
-			})
-			.then(data => {
-				res.json({
-					note: "New block mined & broadcast successfully",
-					block: newBlock
-				});
-			})
-
-		let blocks = []
-		let arrayBlockHash = []
-		let blockchain = await ACIDNoSQLChainBlockModel.find()
-		blockchain.forEach(e => {
-			arrayBlockHash.push(e.block.hash)
-			blocks.push(e.block.index)
-		})
-		function arrayMax(arr) {
-			return arr.reduce(function (p, v) {
-				return (p > v ? p : v);
-			});
-		}
-		newBlock.index = arrayMax(blocks) + 1
-		newBlock.previousBlockHash = arrayBlockHash.pop()
-
-		//Add transactions ACID + Blockchain in SGBD de agregabos MongoDB
-		const session = await mongoose.startSession()
-		session.startTransaction()
-		try {
-			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { session })
-			await ACIDNoSQLChainMineModel.create([{ mineAddress: ACIDNoSQLChain.currentNodeUrl }], { session })
-			await session.commitTransaction()
-		} catch (err) {
-			await session.abortTransaction()		
-		} finally {
-			session.endSession()			
-		}
-	}
-
 
 	// indexConsensu
 	async indexConsensu(req, res) {
@@ -257,6 +181,170 @@ async storeMineMongo(req, res) {
 				}
 			});
 	}
+
+	// mine a block
+	async indexMine(req, res) {
+
+		const lastBlock = ACIDNoSQLChain.getLastBlock();
+		const previousBlockHash = lastBlock['hash'];
+		const currentBlockData = {
+			transactions: ACIDNoSQLChain.pendingTransactions,
+			index: lastBlock['index'] + 1
+		};
+		const nonce = ACIDNoSQLChain.proofOfWork(previousBlockHash, currentBlockData);
+		const blockHash = ACIDNoSQLChain.hashBlock(previousBlockHash, currentBlockData, nonce);
+		const newBlock = ACIDNoSQLChain.createNewBlock(nonce, previousBlockHash, blockHash);
+		const requestPromises = [];
+		ACIDNoSQLChain.networkNodes.forEach(networkNodeUrl => {
+			const requestOptions = {
+				uri: networkNodeUrl + '/block',
+				method: 'POST',
+				body: { newBlock: newBlock },
+				json: true
+			};
+			requestPromises.push(rp(requestOptions));
+		});
+		Promise.all(requestPromises)
+			.then(data => {
+				const requestOptions = {
+					uri: ACIDNoSQLChain.currentNodeUrl + '/transaction/broadcast',
+					method: 'POST',
+					body: {
+						rate: 1.5,
+						sender: "00",
+						mine: nodeAddress
+					},
+					json: true
+				};
+				return rp(requestOptions);
+			})
+			.then(data => {
+				res.json({
+					note: "New block mined & broadcast successfully",
+					block: newBlock
+				});
+			})
+
+		let blocks = []
+		let arrayBlockHash = []
+		let newBlockTransactions = newBlock.transactions.filter(e => {
+			return e.senderId != undefined
+		})
+		let blockchain = await ACIDNoSQLChainBlockModel.find()
+		blockchain.forEach(e => {
+			arrayBlockHash.push(e.block.hash)
+			blocks.push(e.block.index)
+		})
+		function arrayMax(arr) {
+			return arr.reduce(function (p, v) {
+				return (p > v ? p : v);
+			});
+		}
+		newBlock.index = arrayMax(blocks) + 1
+		newBlock.previousBlockHash = arrayBlockHash.pop()
+
+		//Add transactions Blockchain + ACID
+		const session = await mongoose.startSession({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		session.startTransaction()
+		try {
+			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }]).then(() => {
+				newBlockTransactions.forEach(e => {
+					ACIDNoSQLChainTransferenceModel.create(e)
+				})
+			}, { session })
+			await session.commitTransaction()
+		} catch (err) {
+			await session.abortTransaction()
+		} finally {
+			session.endSession()
+		}
+	}
+
+	async storeSender(req, res) {
+		try {
+			const sender = ACIDNoSQLChainSenderModel.create(req.body, { session })
+			res.json(sender)
+		} catch (err) {
+			throw err
+		}
+	}
+
+	async storeRecipient(req, res) {
+		const sessionTransference = await mongoose.startSession()
+		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		try {
+			let recipient = await ACIDNoSQLChainRecipientModel.create([req.body], { sessionTransference })
+			await sessionTransference.commitTransaction()
+			res.json(recipient)
+		} catch (err) {
+			await sessionTransference.abortTransaction()
+		} finally {
+			sessionTransference.endSession()
+		}
+	}
+
+	async updateTransference(req, res) {
+		const sessionTransference = await mongoose.startSession()
+		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		try {
+			let sender = await ACIDNoSQLChainSenderModel.findById(req.body.senderId).session(sessionTransference)
+			let recipient = await ACIDNoSQLChainRecipientModel.findById(req.body.recipientId).session(sessionTransference)
+			let transference = await ACIDNoSQLChainTransferenceModel.findById(req.params.id).session(sessionTransference)
+			sender.amount -= req.body.amount
+			recipient.amount += req.body.amount
+			transference.amount += req.body.amount
+			await ACIDNoSQLChainSenderModel.findByIdAndUpdate(req.body.senderId, sender).session(sessionTransference)
+			await ACIDNoSQLChainRecipientModel.findByIdAndUpdate(req.body.recipientId, recipient).session(sessionTransference)
+			await ACIDNoSQLChainTransferenceModel.findByIdAndUpdate(req.params.id, transference).session(sessionTransference)
+			await sessionTransference.commitTransaction()
+			res.json({ message: "OK" })
+		} catch (err) {
+			await sessionTransference.abortTransaction()
+		} finally {
+			sessionTransference.endSession()
+		}
+	}
+
+	async storeTransference(req, res) {
+		const sessionTransference = await mongoose.startSession()
+		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		try {
+			let transference = await ACIDNoSQLChainTransferenceModel.create([req.body]).session(sessionTransference)
+			await sessionTransference.commitTransaction()
+			res.json(transference)
+		} catch (err) {
+			await sessionTransference.abortTransaction()
+		} finally {
+			sessionTransference.endSession()
+		}
+	}
+
+	async destroyTransference(req, res) {
+		const sessionTransference = await mongoose.startSession()
+		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		try {
+			await ACIDNoSQLChainTransferenceModel.findByIdAndDelete(req.params.id).session(sessionTransference)
+			await sessionTransference.commitTransaction()
+			res.send()
+		} catch (err) {
+			await sessionTransference.abortTransaction()
+		} finally {
+			sessionTransference.endSession()
+		}
+	}
+
+	async indexTransference(req, res) {
+		try {
+			const transference = await ACIDNoSQLChainTransferenceModel.find()
+			res.json(transference)
+		} catch (err) {
+			throw err
+		}
+	}
 }
+
+
+
+
 
 export default new ACIDNoSQLChainController()
