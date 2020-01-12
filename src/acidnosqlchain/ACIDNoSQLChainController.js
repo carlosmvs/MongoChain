@@ -4,9 +4,9 @@ import rp from 'request-promise'
 import uuid from 'uuid/v1'
 const nodeAddress = uuid().split('-').join('');
 import ACIDNoSQLChainBlockModel from './ACIDNoSQLChainBlockModel'
-import ACIDNoSQLChainSenderModel from './ACIDNoSQLChainSender.Model'
+import ACIDNoSQLChainSenderModel from './ACIDNoSQLChainSenderModel'
 import ACIDNoSQLChainRecipientModel from './ACIDNoSQLChainRecipientModel'
-import ACIDNoSQLChainTransferenceModel from './ACIDNoSQLChainTransference.Model'
+import ACIDNoSQLChainTransferenceModel from './ACIDNoSQLChainTransferenceModel'
 
 const ACIDNoSQLChain = new Blockchain();
 
