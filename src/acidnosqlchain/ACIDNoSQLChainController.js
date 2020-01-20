@@ -245,7 +245,10 @@ class ACIDNoSQLChainController {
 
 		//Add transactions Blockchain + ACID
 		const sessionBlockchain = await mongoose.startSession()
-		sessionBlockchain.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		sessionBlockchain.startTransaction({
+			readConcern: { level: 'snapshot' },
+			writeConcern: { w: 'majority' }
+		})
 		try {
 			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { session: sessionBlockchain }).then(() => {
 				newBlockTransactions.forEach(async e => {
