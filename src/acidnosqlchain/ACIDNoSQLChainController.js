@@ -243,7 +243,7 @@ class ACIDNoSQLChainController {
 		newBlock.index = arrayMax(blocks) + 1
 		newBlock.previousBlockHash = arrayBlockHash.pop()
 
-		//Add transactions Blockchain + ACID
+
 		const sessionBlockchain = await mongoose.startSession()
 		sessionBlockchain.startTransaction({
 			readConcern: { level: 'snapshot' },
