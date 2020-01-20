@@ -244,25 +244,30 @@ class ACIDNoSQLChainController {
 		newBlock.previousBlockHash = arrayBlockHash.pop()
 
 		//Add transactions Blockchain + ACID
-		const session = await mongoose.startSession({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
-		session.startTransaction()
+		const sessionBlockchain = await mongoose.startSession()
+		sessionBlockchain.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
 		try {
-			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }]).then(() => {
-				newBlockTransactions.forEach(e => {
-					ACIDNoSQLChainTransferenceModel.create(e)
+			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { session: sessionBlockchain }).then(() => {
+				newBlockTransactions.forEach(async e => {
+					ACIDNoSQLChainTransferenceModel.createCollection().then(() => {
+						if (req.body.amount <= 0) {
+						} else {
+							ACIDNoSQLChainTransferenceModel.create(e).then(() => { })
+						}
+					})
 				})
-			}, { session })
-			await session.commitTransaction()
+			})
+			await sessionBlockchain.commitTransaction()
 		} catch (err) {
-			await session.abortTransaction()
+			await sessionBlockchain.abortTransaction()
 		} finally {
-			session.endSession()
+			sessionBlockchain.endSession()
 		}
 	}
 
 	async storeSender(req, res) {
 		try {
-			const sender = ACIDNoSQLChainSenderModel.create(req.body, { session })
+			const sender = await ACIDNoSQLChainSenderModel.create(req.body)
 			res.json(sender)
 		} catch (err) {
 			throw err
@@ -270,16 +275,11 @@ class ACIDNoSQLChainController {
 	}
 
 	async storeRecipient(req, res) {
-		const sessionTransference = await mongoose.startSession()
-		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
 		try {
-			let recipient = await ACIDNoSQLChainRecipientModel.create([req.body], { sessionTransference })
-			await sessionTransference.commitTransaction()
+			let recipient = await ACIDNoSQLChainRecipientModel.create(req.body)
 			res.json(recipient)
 		} catch (err) {
-			await sessionTransference.abortTransaction()
-		} finally {
-			sessionTransference.endSession()
+			throw err
 		}
 	}
 
@@ -292,7 +292,7 @@ class ACIDNoSQLChainController {
 			let transference = await ACIDNoSQLChainTransferenceModel.findById(req.params.id).session(sessionTransference)
 			sender.amount -= req.body.amount
 			recipient.amount += req.body.amount
-			transference.amount += req.body.amount
+			transference.status = 'Concluído'
 			await ACIDNoSQLChainSenderModel.findByIdAndUpdate(req.body.senderId, sender).session(sessionTransference)
 			await ACIDNoSQLChainRecipientModel.findByIdAndUpdate(req.body.recipientId, recipient).session(sessionTransference)
 			await ACIDNoSQLChainTransferenceModel.findByIdAndUpdate(req.params.id, transference).session(sessionTransference)
@@ -305,46 +305,28 @@ class ACIDNoSQLChainController {
 		}
 	}
 
-	async storeTransference(req, res) {
-		const sessionTransference = await mongoose.startSession()
-		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+	async showTransferenceBySenderId(req, res) {
 		try {
-			let transference = await ACIDNoSQLChainTransferenceModel.create([req.body]).session(sessionTransference)
-			await sessionTransference.commitTransaction()
-			res.json(transference)
+			const transferences = await ACIDNoSQLChainTransferenceModel.find()
+			let senders = transferences.filter(sender => {
+				return sender.senderId == req.params.id
+			})
+			res.json(senders)
 		} catch (err) {
-			await sessionTransference.abortTransaction()
-		} finally {
-			sessionTransference.endSession()
+			throw err
 		}
 	}
 
-	async destroyTransference(req, res) {
-		const sessionTransference = await mongoose.startSession()
-		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+	async showTransferenceByRecipientId(req, res) {
 		try {
-			await ACIDNoSQLChainTransferenceModel.findByIdAndDelete(req.params.id).session(sessionTransference)
-			await sessionTransference.commitTransaction()
-			res.send()
-		} catch (err) {
-			await sessionTransference.abortTransaction()
-		} finally {
-			sessionTransference.endSession()
-		}
-	}
-
-	async indexTransference(req, res) {
-		try {
-			const transference = await ACIDNoSQLChainTransferenceModel.find()
-			res.json(transference)
+			const transferences = await ACIDNoSQLChainTransferenceModel.find()
+			let recipients = transferences.filter(recipient => {
+				return recipient.recipientId == req.params.id
+			})
+			res.json(recipients)
 		} catch (err) {
 			throw err
 		}
 	}
 }
-
-
-
-
-
 export default new ACIDNoSQLChainController()

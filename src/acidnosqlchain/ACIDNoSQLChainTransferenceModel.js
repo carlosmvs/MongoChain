@@ -12,6 +12,10 @@ const ACIDNoSQLChainTransferenceSchema = new mongoose.Schema({
   amount: {
     type: Number
   },
+  status: {
+    type: String,
+    default: 'Solicitado'
+  },
   createdAt: {
     type: Date,
     default: Date.now

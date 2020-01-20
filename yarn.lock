@@ -912,11 +912,6 @@ mongodb@^3.4.0:
   optionalDependencies:
     saslprep "^1.0.0"
 
-mongoose-acid@^0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/mongoose-acid/-/mongoose-acid-0.14.0.tgz#60f6d43489c2573d69efe1d9c7a8dce24a24a2ab"
-  integrity sha512-EUpvQ16nD9ar75RkkK85FmFGWJWuTgxnqSP1N2GqiNyFK7PQA/FCkIAuB7k5VFQEzuy1oWts6Dh2POsuybAwlQ==
-
 mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"

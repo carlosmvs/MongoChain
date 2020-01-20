@@ -3,10 +3,11 @@ import { Router } from 'express'
 const routesBlockchain = new Router()
 
 import ACIDNoSQLChainController from './ACIDNoSQLChainController'
+import ACIDNoSQLChainRecipientModel from './ACIDNoSQLChainRecipientModel'
 
 routesBlockchain.post('/blockchain/mongo', ACIDNoSQLChainController.storeBlockchainMongo)
 
-routesBlockchain.get('/blockchain/mongo', ACIDNoSQLChainController.indexBlockchainMongo)
+routesBlockchain.get('/blockchain/server', ACIDNoSQLChainController.indexBlockchainMongo)
 
 routesBlockchain.get('/blockchain', ACIDNoSQLChainController.indexBlockchain)
 
@@ -28,14 +29,14 @@ routesBlockchain.get('/consensu', ACIDNoSQLChainController.indexConsensu)
 
 
 routesBlockchain.post('/senders', ACIDNoSQLChainController.storeSender)
+
+
 routesBlockchain.post('/recipients', ACIDNoSQLChainController.storeRecipient)
+routesBlockchain.get('/recipients/:id', ACIDNoSQLChainController.showTransferenceByRecipientId)
 
-routesBlockchain.post('/transferences', ACIDNoSQLChainController.storeTransference)
-routesBlockchain.get('/transferences', ACIDNoSQLChainController.indexTransference)
 routesBlockchain.put('/transferences/:id', ACIDNoSQLChainController.updateTransference)
-routesBlockchain.delete('/transferences/:id', ACIDNoSQLChainController.destroyTransference)
-
-
+routesBlockchain.get('/transferences/:senderId', ACIDNoSQLChainController.showTransferenceBySenderId)
+routesBlockchain.get('/transferences/:recipientId', ACIDNoSQLChainController.showTransferenceBySenderId)
 
 
 
