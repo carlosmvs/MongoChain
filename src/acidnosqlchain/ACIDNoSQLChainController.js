@@ -30,7 +30,7 @@ class ACIDNoSQLChainController {
 	}
 
 	// get entire blockchain current in server
-	async indexBlockchain(req, res) {
+	async indexBlockchainServer(req, res) {
 		res.send(ACIDNoSQLChain);
 	}
 
@@ -184,7 +184,6 @@ class ACIDNoSQLChainController {
 
 	// mine a block
 	async indexMine(req, res) {
-
 		const lastBlock = ACIDNoSQLChain.getLastBlock();
 		const previousBlockHash = lastBlock['hash'];
 		const currentBlockData = {
@@ -210,7 +209,7 @@ class ACIDNoSQLChainController {
 					uri: ACIDNoSQLChain.currentNodeUrl + '/transaction/broadcast',
 					method: 'POST',
 					body: {
-						rate: 1.5,
+						rate: 5,
 						sender: "00",
 						mine: nodeAddress
 					},
@@ -250,16 +249,14 @@ class ACIDNoSQLChainController {
 			writeConcern: { w: 'majority' }
 		})
 		try {
-			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }], { session: sessionBlockchain }).then(() => {
-				newBlockTransactions.forEach(async e => {
-					ACIDNoSQLChainTransferenceModel.createCollection().then(() => {
-						if (req.body.amount <= 0) {
-						} else {
+			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }],
+				{ session: sessionBlockchain }).then(() => {
+					newBlockTransactions.forEach(async e => {
+						ACIDNoSQLChainTransferenceModel.createCollection().then(() => {
 							ACIDNoSQLChainTransferenceModel.create(e).then(() => { })
-						}
+						})
 					})
 				})
-			})
 			await sessionBlockchain.commitTransaction()
 		} catch (err) {
 			await sessionBlockchain.abortTransaction()
@@ -288,12 +285,15 @@ class ACIDNoSQLChainController {
 
 	async updateTransference(req, res) {
 		const sessionTransference = await mongoose.startSession()
-		sessionTransference.startTransaction({ readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } })
+		sessionTransference.startTransaction({
+			readConcern: { level: 'snapshot' },
+			writeConcern: { w: 'majority' }
+		})
 		try {
-			let sender = await ACIDNoSQLChainSenderModel.findById(req.body.senderId).session(sessionTransference)
-			let recipient = await ACIDNoSQLChainRecipientModel.findById(req.body.recipientId).session(sessionTransference)
-			let transference = await ACIDNoSQLChainTransferenceModel.findById(req.params.id).session(sessionTransference)
-			sender.amount -= req.body.amount
+			let sender = await ACIDNoSQLChainSenderModel.findById(req.body.senderId)
+			let recipient = await ACIDNoSQLChainRecipientModel.findById(req.body.recipientId)
+			let transference = await ACIDNoSQLChainTransferenceModel.findById(req.params.id)
+			sender.amount -= (req.body.amount - 0.25)
 			recipient.amount += req.body.amount
 			transference.status = 'Concluído'
 			await ACIDNoSQLChainSenderModel.findByIdAndUpdate(req.body.senderId, sender).session(sessionTransference)
