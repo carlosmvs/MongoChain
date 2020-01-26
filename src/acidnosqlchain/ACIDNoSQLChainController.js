@@ -251,9 +251,9 @@ class ACIDNoSQLChainController {
 		try {
 			await ACIDNoSQLChainBlockModel.create([{ block: newBlock }],
 				{ session: sessionBlockchain }).then(() => {
-					newBlockTransactions.forEach(async e => {
+					newBlockTransactions.forEach(async transaction => {
 						ACIDNoSQLChainTransferenceModel.createCollection().then(() => {
-							ACIDNoSQLChainTransferenceModel.create(e).then(() => { })
+							ACIDNoSQLChainTransferenceModel.create(transaction).then(() => { })
 						})
 					})
 				})
