@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const MongoChainSenderSchema = new mongoose.Schema({
-  sender: {
+  name: {
     type: String
   },
   amount: {

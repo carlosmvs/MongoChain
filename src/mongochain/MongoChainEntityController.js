@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import MongoChainSenderModel from './MongoChainSenderModel'
 import MongoChainRecipientModel from './MongoChainRecipientModel'
+import MongoChainTransferenceModel from './MongoChainTransferenceModel'
 
 class MongoChainEntityController {
 
@@ -51,7 +52,7 @@ class MongoChainEntityController {
     try {
       const transferences = await MongoChainTransferenceModel.find()
       let senders = transferences.filter(sender => {
-        return sender.senderId == req.params.id
+        return sender.senderId = req.params.senderId
       })
       res.json(senders)
     } catch (err) {
@@ -63,7 +64,7 @@ class MongoChainEntityController {
     try {
       const transferences = await MongoChainTransferenceModel.find()
       let recipients = transferences.filter(recipient => {
-        return recipient.recipientId == req.params.id
+        return recipient.recipientId == req.params.recipientId
       })
       res.json(recipients)
     } catch (err) {

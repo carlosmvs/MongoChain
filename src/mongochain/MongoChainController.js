@@ -4,8 +4,6 @@ import rp from 'request-promise'
 import uuid from 'uuid/v1'
 const nodeAddress = uuid().split('-').join('');
 import MongoChainBlockModel from './MongoChainBlockModel'
-import MongoChainSenderModel from './MongoChainSenderModel'
-import MongoChainRecipientModel from './MongoChainRecipientModel'
 import MongoChainTransferenceModel from './MongoChainTransferenceModel'
 
 const MongoChain = new Blockchain();
