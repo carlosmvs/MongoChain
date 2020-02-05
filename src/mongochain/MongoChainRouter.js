@@ -27,12 +27,4 @@ routesBlockchain.get('/mine', MongoChainController.indexMine)
 routesBlockchain.get('/consensu', MongoChainController.indexConsensu)
 
 
-
-
-
-routesBlockchain.put('/transferences/:id', MongoChainController.updateTransference)
-routesBlockchain.get('/transferences/:senderId', MongoChainController.showTransferenceBySenderId)
-routesBlockchain.get('/transferences/:recipientId', MongoChainController.showTransferenceByRecipientId)
-
-
 export default routesBlockchain
