@@ -27,16 +27,12 @@ routesBlockchain.get('/mine', MongoChainController.indexMine)
 routesBlockchain.get('/consensu', MongoChainController.indexConsensu)
 
 
-routesBlockchain.post('/senders', MongoChainController.storeSender)
 
-routesBlockchain.post('/recipients', MongoChainController.storeRecipient)
 
-routesBlockchain.get('/recipients/:id', MongoChainController.showTransferenceByRecipientId)
 
 routesBlockchain.put('/transferences/:id', MongoChainController.updateTransference)
 routesBlockchain.get('/transferences/:senderId', MongoChainController.showTransferenceBySenderId)
 routesBlockchain.get('/transferences/:recipientId', MongoChainController.showTransferenceByRecipientId)
-
 
 
 export default routesBlockchain
