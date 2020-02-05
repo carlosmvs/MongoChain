@@ -1,2 +1,2 @@
-# ACIDNoSQLChain
-Framework com funcionalidades que fazem a integração dos conceitos ACID, Blockchain e NoSQL.
+# MongoChain
+Framework que faz a integração entre o SGBD NoSQL com uma Blockchain descentralizada.

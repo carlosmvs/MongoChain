@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const ACIDNoSQLChainRecipientSchema = new mongoose.Schema({
+const MongoChainRecipientSchema = new mongoose.Schema({
   recipient: {
     type: String
   },
@@ -13,4 +13,4 @@ const ACIDNoSQLChainRecipientSchema = new mongoose.Schema({
   }
 })
 
-export default mongoose.model('Recipient', ACIDNoSQLChainRecipientSchema)
+export default mongoose.model('Recipient', MongoChainRecipientSchema)

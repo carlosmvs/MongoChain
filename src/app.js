@@ -2,7 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
 import databaseMongo from './config/databaseMongo'
-import routesACIDNoSQLChain from './acidnosqlchain/ACIDNoSQLChainRouter'
+import routesMongoChain from './mongochain/MongoChainRouter'
 
 class APP {
   constructor() {
@@ -21,7 +21,7 @@ class APP {
   }
 
   routes() {
-    this.server.use(routesACIDNoSQLChain)
+    this.server.use(routesMongoChain)
   }
 }
 
