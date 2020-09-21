@@ -7,7 +7,7 @@ function Blockchain() {
 	this.pendingTransactions = [];
 	this.currentNodeUrl = currentNodeUrl;
 	this.networkNodes = [];
-	this.createNewBlock(100, '0', '0');
+	this.createNewBlock(100, '0', '0');	
 };
 
 Blockchain.prototype.createNewBlock = function (nonce, previousBlockHash, hash) {
@@ -28,13 +28,11 @@ Blockchain.prototype.getLastBlock = function () {
 	return this.chain[this.chain.length - 1];
 };
 
-Blockchain.prototype.createNewTransaction = function (senderId, recipientId, amount, rate, mine) {
+Blockchain.prototype.createNewTransaction = function (senderId, recipientId, amount) {
 	const newTransaction = {
 		senderId: senderId,
 		recipientId: recipientId,
 		amount: amount,
-		rate: rate,
-		mine: mine,
 		transactionId: uuid().split('-').join('')
 	};
 	return newTransaction;
