@@ -73,6 +73,15 @@ class MongoChainEntityController {
     }
   }
 
+  async indexTransference(req, res) {
+    try {
+      const transferences = await MongoChainTransferenceModel.find()
+      res.json(transferences)
+    } catch (err) {
+      throw err
+    }
+  }
+
   async showTransferenceBySenderId(req, res) {
     try {
       const transferences = await MongoChainTransferenceModel.find()
