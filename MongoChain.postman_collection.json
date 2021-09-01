@@ -1,0 +1,466 @@
+{
+	"info": {
+		"_postman_id": "42e61d6d-eed7-4f41-937e-440204e677dd",
+		"name": "MongoChain",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Sender",
+			"item": [
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"João\",\n\t\"amount\": 2500\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/senders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"senders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recipient",
+			"item": [
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Maria\",\n\t\"amount\": 0\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/recipients",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"recipients"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Blockchain",
+			"item": [
+				{
+					"name": "storeBlockchainMongo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/blockchain/mongo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"blockchain",
+								"mongo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registerAndBroadcastNode",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"newNodeUrl\": \"http://localhost:3005\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3002/node/broadcast",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"node",
+								"broadcast"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "indexBlockchainMongo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/blockchain/mongo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"blockchain",
+								"mongo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "node_1",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/blockchain/server",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"blockchain",
+								"server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "node_2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3002/blockchain/server",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"blockchain",
+								"server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "node_3",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3003/blockchain/server",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3003",
+							"path": [
+								"blockchain",
+								"server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "node_4",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3004/blockchain/server",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3004",
+							"path": [
+								"blockchain",
+								"server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "node_5",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3005/blockchain/server",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3005",
+							"path": [
+								"blockchain",
+								"server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transactionBroadcast",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"senderId\": \"612920bd863fac6744e1d9f3\",\n\t\"recipientId\": \"612920d4863fac6744e1d9f4\",\n\t\"amount\": 600\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/transaction/broadcast",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transaction",
+								"broadcast"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mineBlock",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3002/mine",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"mine"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "consensusNodes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3004/consensu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3004",
+							"path": [
+								"consensu"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Transference",
+			"item": [
+				{
+					"name": "confirmTransacion",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"senderId\": \"612920bd863fac6744e1d9f3\",\n\t\"recipientId\": \"612920d4863fac6744e1d9f4\",\n\t\"amount\": 400\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/transferences/61292470b51a0067abc29510",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transferences",
+								"61292470b51a0067abc29510"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/transferences/5ee82c31188ee82d9d072acf",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transferences",
+								"5ee82c31188ee82d9d072acf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/transferences",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transferences"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "showTrasnferenceBySenderId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/transferences/5e3ac160dac32c25099722df",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transferences",
+								"5e3ac160dac32c25099722df"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "showTrasnferenceByRecipientId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/transferences/5e3ac177dac32c25099722e0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"transferences",
+								"5e3ac177dac32c25099722e0"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
